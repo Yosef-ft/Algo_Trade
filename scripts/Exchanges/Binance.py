@@ -36,28 +36,74 @@ class BinacneClient:
             return None
 
 
-    def get_symbols(self):
+    def get_symbols(self, only_usdt: bool = True) -> list:
+        '''
+        This function gets all the symbols avalable in the binance exchange
+
+        Parameters:
+        ----------
+            only_usdt(bool): if true: This allows as to return symbols with quote asset of USDT
+
+        Returns:
+        -------
+            symbols(list): Returns a list of symbols
+        '''
 
         params = dict()
 
         endpoint = '/fapi/v1/exchangeInfo' if self.futures else '/api/v1/exchangeInfo'
-
+        
         data = self._make_request(endpoint, params)
 
-        symbols_data = data['symbols']
-        symbols = []
+        # To check if the response is valid or not
+        if data != None:
+            symbols_data = data['symbols']
+            symbols = []
+            
+            # Only collect symbols that have a quote asset of USDT because they have a higher volume
+            for symbol in symbols_data:
+                if only_usdt:
+                    if symbol['quoteAsset'] == 'USDT':
+                        symbols.append(symbol['symbol'])
+
+                else:
+                    symbols.append(symbol['symbol'])
+
+            return symbols
         
-        # Only collect symbols that have a quote asset of USDT because they have a higher volume
-        for symbol in symbols_data:
-            if symbol['quoteAsset'] == 'USDT':
-                symbols.append(symbol['symbol'])
+        return None
+    
 
-        return symbols
+    def get_historica_data(self, symbol: str, interval: str = '1m', startTime: Optional[int] = None, endTime : Optional[int] = None):
+
+        params = dict()
+
+        params['symbol'] = symbol
+        params['interval'] = interval
+        params['limit'] = 1000
+
+        if startTime != None:
+            params['startTime'] = startTime
+        if endTime != None:
+            params['endTime'] = endTime
 
 
+        endpoint = '/fapi/v1/klines' if self.futures else '/api/v3/klines'   
+
+        data = self._make_request(endpoint, query_parameters=params) 
+        candles = []
+
+        if data != None:
+            for candle in data:
+                candles.append((float(candle[0]), float(candle[1]), float(candle[2]), float(candle[3]), float(candle[4]), float(candle[5])))
+        
+            return candles   
+
+        else:
+            return None
 
 
 if __name__ == "__main__":
-    bin = BinacneClient(False)
-    print(bin.get_symbols())
+    bin = BinacneClient(True)
+    print(bin.get_historica_data('BTCUSDT'))
 
