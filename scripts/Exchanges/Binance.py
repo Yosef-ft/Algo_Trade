@@ -1,9 +1,15 @@
+import os
+import sys
+
 from typing import *
 import requests
 import logging
 
+sys.path.append(os.path.abspath('scripts'))
+from logger import logging_setup
 
-logger = logging.getLogger()
+
+logger = logging_setup()
 
 
 class BinanceClient:
@@ -35,14 +41,18 @@ class BinanceClient:
         except Exception as e: 
             response = None
             logger.error("Error while making request to %s: %s", endpoint, e)
-
-        if response.status_code == 200:
-            return response.json()
         
-        else:
-            logger.error("Error while making request to %s: %s (status code = %s)",
-                         endpoint, response.json(), response.status_code)
-            return None
+        
+        try:
+            if response.status_code == 200:
+                return response.json()
+            
+            else:
+                logger.error("Error while making request to %s: %s (status code = %s)",
+                            endpoint, response.json(), response.status_code)
+                return None
+        except: 
+            logger.error("Error while making request to %s: %s", endpoint, e)
 
 
     def get_symbols(self, only_usdt: bool = True) -> list:
@@ -77,7 +87,7 @@ class BinanceClient:
 
                 else:
                     symbols.append(symbol['symbol'])
-
+            
             return symbols
         
         return None
@@ -135,5 +145,5 @@ class BinanceClient:
 if __name__ == "__main__":
     bin = BinanceClient(True)
     candles = bin.get_historica_data('BTCUSDT')
-    print(candles)
+    # print(candles)
 
