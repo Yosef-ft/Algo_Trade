@@ -25,6 +25,7 @@ class BinacneClient:
         try:
             response = requests.get(self._base_url + endpoint, params=query_parameters)
         except Exception as e: 
+            response = None
             logger.error("Error while making request to %s: %s", endpoint, e)
 
         if response.status_code == 200:
@@ -40,7 +41,7 @@ class BinacneClient:
         '''
         This function gets all the symbols avalable in the binance exchange
 
-        Parameters:
+        Parameter:
         ----------
             only_usdt(bool): if true: This allows as to return symbols with quote asset of USDT
 
@@ -74,13 +75,33 @@ class BinacneClient:
         return None
     
 
-    def get_historica_data(self, symbol: str, interval: str = '1m', startTime: Optional[int] = None, endTime : Optional[int] = None):
+    def get_historica_data(self, symbol: str, interval: str = '1m', startTime: Optional[int] = None, endTime : Optional[int] = None) -> List:
+        '''
+        This function returns the Open time, open, high, low, close, volume for a given symbol
+
+        Parameter:
+        ----------
+            symbol(str): The symobol we want the data
+            interval(str): the interval of the data:
+                ENUM: s-> seconds; m -> minutes; h -> hours; d -> days; w -> weeks; M -> months
+                        - 1s
+                        - 1m, 3m, 5m, 15m, 30m
+                        - 1h, 2h, 4h, 6h, 8h, 12h
+                        - 1d, 3d, 1w
+                        - 1M
+            startTime (Optional[int]): The starting timestamp (Unix time) for the data retrieval.
+            endTime (Optional[int]): The ending timestamp (Unix time) for the data retrieval.
+
+        Returns:
+        -------
+            candlestick(List): Contains Open time, open, high, low, close prices and volume data for the given symbol and interval.                        
+        '''
 
         params = dict()
 
         params['symbol'] = symbol
         params['interval'] = interval
-        params['limit'] = 1000
+        params['limit'] = 1500
 
         if startTime != None:
             params['startTime'] = startTime
@@ -96,7 +117,7 @@ class BinacneClient:
         if data != None:
             for candle in data:
                 candles.append((float(candle[0]), float(candle[1]), float(candle[2]), float(candle[3]), float(candle[4]), float(candle[5])))
-        
+            logger.debug('Candles stick successfully scraped')
             return candles   
 
         else:
@@ -104,6 +125,7 @@ class BinacneClient:
 
 
 if __name__ == "__main__":
-    bin = BinacneClient(True)
-    print(bin.get_historica_data('BTCUSDT'))
+    bin = BinacneClient(False)
+    candles = bin.get_historica_data('BTCUSDT')
+    print(candles)
 
