@@ -6,7 +6,7 @@ import logging
 logger = logging.getLogger()
 
 
-class BinacneClient:
+class BinanceClient:
     def __init__(self, futures= False):
 
         self.futures = futures
@@ -20,7 +20,15 @@ class BinacneClient:
         self.symbols = self.get_symbols()
 
 
-    def _make_request(self, endpoint: str, query_parameters: Dict):
+    def _make_request(self, endpoint: str, query_parameters: Dict)-> Union[Dict, None]:
+        '''
+        This function is used to make requests
+
+        Parameters:
+        ----------
+            endpoint(str): The endpoint you want to access
+            query_parameters(Dict): A dictionary containing all your query sets
+        '''
 
         try:
             response = requests.get(self._base_url + endpoint, params=query_parameters)
@@ -125,7 +133,7 @@ class BinacneClient:
 
 
 if __name__ == "__main__":
-    bin = BinacneClient(False)
+    bin = BinanceClient(True)
     candles = bin.get_historica_data('BTCUSDT')
     print(candles)
 
