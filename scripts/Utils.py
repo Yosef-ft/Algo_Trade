@@ -1,32 +1,58 @@
 import os
 import sys
+import datetime
 import logging
 
 
-logger = logging.getLogger()
+class Util:
+
+    def logging_setup(self):
+        '''
+        This funciton is used to setup logging
+        '''    
+        log_dir = os.path.join(os.getcwd(), 'logs')
+
+        if not os.path.exists(log_dir):
+            os.mkdir(log_dir)
+
+        log_file_info = os.path.join(log_dir, 'Info.log')
+        log_file_error = os.path.join(log_dir, 'Error.log')
+
+        formatter = logging.Formatter('%(asctime)s - %(levelname)s :: %(message)s',
+                                    datefmt='%Y-%m-%d %H:%M')
+
+        info_handler = logging.FileHandler(log_file_info)
+        info_handler.setLevel(logging.INFO)
+        info_handler.setFormatter(formatter)
+
+        error_handler = logging.FileHandler(log_file_error)
+        error_handler.setLevel(logging.ERROR)
+        error_handler.setFormatter(formatter)
+
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(logging.DEBUG)
+        console_handler.setFormatter(formatter)
 
 
-log_dir = os.path.join(os.getcwd(), 'logs')
-if not os.path.exists(log_dir):
-    os.mkdir(log_dir)
+        logger = logging.getLogger(__name__)
+        logger.setLevel(logging.DEBUG)
+        logger.addHandler(info_handler)
+        logger.addHandler(error_handler)
+        logger.addHandler(console_handler)       
 
-formatter = logging.Formatter('%(asctime)s - %(levelname)s :: %(message)s')
+        return logger 
+    
 
-
-log_file_error = os.path.join(log_dir, 'Error.log')
-log_file_info = os.path.join(log_dir, 'Info.log')
-
-
-info_handler = logging.FileHandler(log_file_info)
-error_handler = logging.FileHandler(log_file_error)
-
-info_handler.setLevel(logging.DEBUG)
-error_handler.setLevel(logging.ERROR)
+    def ms_to_dt(self, ms: int) ->datetime.datetime:
+        return datetime.datetime.fromtimestamp(ms/1000)
 
 
-info_handler.setFormatter(formatter)
-error_handler.setFormatter(formatter)
 
 
-logger.addHandler(info_handler)
-logger.addHandler(error_handler)
+
+from Exchanges.Binance import BinacneClient
+from data_collector import *
+
+if __name__ == "__main__":
+    bin = BinacneClient(False)
+    print(bin.get_historica_data('BTCUSDT'))
