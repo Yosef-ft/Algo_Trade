@@ -5,9 +5,10 @@ import logging
 from Exchanges.Binance import BinanceClient
 from databases import Database
 from Utils import Util
+from logger import logging_setup
 
 utils = Util()
-logger = utils.logging_setup()
+logger = logging_setup()
 
 
 
