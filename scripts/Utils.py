@@ -44,15 +44,18 @@ class Util:
     
 
     def ms_to_dt(self, ms: int) ->datetime.datetime:
-        return datetime.datetime.fromtimestamp(ms/1000)
+        '''
+        Function to change milli seconds to datetime
+        '''
+        return datetime.datetime.fromtimestamp(ms / 1000)
 
 
 
 
 
-from Exchanges.Binance import BinacneClient
 from data_collector import *
+from Exchanges.Binance import BinanceClient
 
 if __name__ == "__main__":
-    bin = BinacneClient(False)
+    bin = BinanceClient(False)
     print(bin.get_historica_data('BTCUSDT'))
